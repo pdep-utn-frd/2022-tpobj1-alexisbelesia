@@ -12,8 +12,11 @@ object juego{
 		game.addVisual(cactus)
 		game.addVisual(dino)
 		game.addVisual(reloj)
-	
+		game.addVisual(meteorito)
+	    game.addVisual(segundoMeteorito)
+	    
 		keyboard.space().onPressDo{ self.jugar()}
+		keyboard.alt().onPressDo{ self.comando()}
 		
 		game.onCollideDo(dino,{ obstaculo => obstaculo.chocar()})
 		
@@ -23,7 +26,17 @@ object juego{
 		dino.iniciar()
 		reloj.iniciar()
 		cactus.iniciar()
+		meteorito.iniciar()
+		segundoMeteorito.iniciar()
 	}
+	method comando(){
+		if (dino.estaVivo()) 
+			dino.caer()
+		else {
+			game.removeVisual(gameOver)
+			self.iniciar()
+		}
+		}
 	
 	method jugar(){
 		if (dino.estaVivo()) 
@@ -40,6 +53,8 @@ object juego{
 		cactus.detener()
 		reloj.detener()
 		dino.morir()
+		meteorito.detener()
+		segundoMeteorito.detener()
 	}
 	
 }
@@ -72,7 +87,7 @@ object reloj {
 
 object cactus {
 	 
-	const posicionInicial = game.at(game.width()-1,suelo.position().y())
+	const posicionInicial = game.at(game.width()-3,suelo.position().y())
 	var position = posicionInicial
 
 	method image() = "cactus.png"
@@ -85,7 +100,7 @@ object cactus {
 	
 	method mover(){
 		position = position.left(1)
-		if (position.x() == -1)
+		if (position.x() == -3)
 			position = posicionInicial
 	}
 	
@@ -96,7 +111,58 @@ object cactus {
 		game.removeTickEvent("moverCactus")
 	}
 }
+ object meteorito {
+	 
+	const posicionInicial = game.at(game.width()-1,2)
+	var position = posicionInicial
 
+	method image() = "meteorito.png"
+	method position() = position
+	
+	method iniciar(){
+		position = posicionInicial
+		game.onTick(velocidad,"moverMeteorito",{self.mover()})
+	}
+	
+	method mover(){
+		position = position.left(1)
+		if (position.x() == -1)
+			position = posicionInicial
+	}
+	
+	method chocar(){
+		reloj.iniciar()
+	}
+    method detener(){
+		game.removeTickEvent("moverMeteorito")
+	}
+}
+ object segundoMeteorito {
+	 
+	const posicionInicial = game.at(game.width()-5,2)
+	var position = posicionInicial
+
+	method image() = "meteorito.png"
+	method position() = position
+	
+	method iniciar(){
+		position = posicionInicial
+		game.onTick(velocidad,"moverMeteorito",{self.mover()})
+	}
+	
+	method mover(){
+		position = position.left(1)
+		if (position.x() == -5)
+			position = posicionInicial
+	}
+	
+	method chocar(){
+		reloj.iniciar()
+	}
+    method detener(){
+		game.removeTickEvent("moverMeteorito")
+	}
+}
 object suelo{
 	
 	method position() = game.origin().up(1)
@@ -115,8 +181,14 @@ object dino {
 	method saltar(){
 		if(position.y() == suelo.position().y()) {
 			self.subir()
-			game.schedule(velocidad*3,{self.bajar()})
+			//game.schedule(velocidad*3,{self.bajar()})
 		}
+		}
+	method caer(){
+		if(position.y() == 2) {
+			self.bajar()
+			//game.schedule(velocidad*3,{self.bajar()})
+		}	
 	}
 	
 	method subir(){
